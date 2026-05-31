@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#182029">
+    <title>LifePilot</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="mark">LP</div>
+          <div>
+            <h1>LifePilot</h1>
+            <p>Daily control room</p>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Views">
+          <button class="nav-button active" data-view="today" title="Today">
+            <span>Today</span>
+            <strong id="todayCount">0</strong>
+          </button>
+          <button class="nav-button" data-view="money" title="Money">
+            <span>Money</span>
+            <strong id="moneyCount">0</strong>
+          </button>
+          <button class="nav-button" data-view="docs" title="Documents">
+            <span>Docs</span>
+            <strong id="docsCount">0</strong>
+          </button>
+          <button class="nav-button" data-view="health" title="Health">
+            <span>Health</span>
+            <strong id="healthCount">0</strong>
+          </button>
+        </nav>
+
+        <section class="score-panel" aria-label="Readiness score">
+          <span>Life readiness</span>
+          <strong id="readinessScore">72%</strong>
+          <div class="meter"><span id="scoreBar"></span></div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">May 29, 2026</p>
+            <h2 id="viewTitle">Today priority map</h2>
+            <p id="personalLine" class="personal-line">Your day, sorted by what matters.</p>
+          </div>
+          <div class="actions">
+            <button id="seedBtn" class="icon-button" title="Load sample data">+</button>
+            <button id="clearDoneBtn" class="icon-button" title="Clear completed">x</button>
+          </div>
+        </header>
+
+        <section class="quick-add" aria-label="Add new life item">
+          <input id="itemTitle" type="text" placeholder="Add bill, task, document, appointment..." maxlength="90">
+          <select id="itemCategory" aria-label="Category">
+            <option value="admin">Admin</option>
+            <option value="money">Money</option>
+            <option value="docs">Docs</option>
+            <option value="health">Health</option>
+            <option value="work">Work</option>
+          </select>
+          <select id="itemImpact" aria-label="Impact">
+            <option value="3">High</option>
+            <option value="2">Medium</option>
+            <option value="1">Low</option>
+          </select>
+          <input id="itemDate" type="date" aria-label="Due date">
+          <button id="addBtn">Add</button>
+        </section>
+
+        <section class="brain-dump" aria-label="Smart capture">
+          <div class="brain-copy">
+            <h3>Brain dump</h3>
+            <p>Paste messy life notes. LifePilot turns them into dated priorities.</p>
+          </div>
+          <textarea id="brainDump" rows="3" placeholder="Example: oplati arendu zavtra, prodli strahovku, pozvoni vrachu v ponedelnik"></textarea>
+          <div class="brain-actions">
+            <button id="voiceBtn" title="Voice input">Voice</button>
+            <button id="captureBtn">Analyze</button>
+            <button id="acceptCaptureBtn" disabled>Add parsed</button>
+          </div>
+          <p id="voiceStatus" class="voice-status">Voice input is ready when supported.</p>
+          <div id="capturePreview" class="capture-preview" aria-live="polite"></div>
+        </section>
+
+        <section class="daily-plan" aria-label="Daily plan">
+          <div class="plan-head">
+            <div>
+              <p class="eyebrow">AI Daily Plan</p>
+              <h3 id="planFocus">Ready when you are</h3>
+            </div>
+            <button id="planBtn">Plan my day</button>
+          </div>
+          <div id="planList" class="plan-list" aria-live="polite">
+            <p class="plan-empty">Generate a clear order of action from your open priorities.</p>
+          </div>
+        </section>
+
+        <section class="summary-grid" aria-label="Daily summary">
+          <article class="summary-item">
+            <span>Urgent</span>
+            <strong id="urgentTotal">0</strong>
+          </article>
+          <article class="summary-item">
+            <span>This week</span>
+            <strong id="weekTotal">0</strong>
+          </article>
+          <article class="summary-item">
+            <span>Money risk</span>
+            <strong id="riskTotal">$0</strong>
+          </article>
+          <article class="summary-item">
+            <span>Done</span>
+            <strong id="doneTotal">0</strong>
+          </article>
+        </section>
+
+        <section class="risk-radar" aria-label="Risk radar">
+          <div class="radar-head">
+            <div>
+              <p class="eyebrow">Risk Radar</p>
+              <h3 id="radarFocus">Scanning open priorities</h3>
+            </div>
+            <span id="radarLevel" class="radar-level">Stable</span>
+          </div>
+          <div id="radarGrid" class="radar-grid"></div>
+        </section>
+
+        <section class="notification-center" aria-label="Notification center">
+          <div class="notification-head">
+            <div>
+              <p class="eyebrow">Notification Center</p>
+              <h3 id="notifyFocus">Reminders are local</h3>
+            </div>
+            <div class="notification-actions">
+              <span id="notifyStatus" class="notify-status">Off</span>
+              <button id="notifyBtn">Enable alerts</button>
+              <button id="installBtn" hidden>Install app</button>
+              <button id="testNotifyBtn">Test</button>
+            </div>
+          </div>
+          <div id="notifyList" class="notify-list" aria-live="polite"></div>
+        </section>
+
+        <section class="settings-panel" aria-label="Settings and backup">
+          <div class="settings-head">
+            <div>
+              <p class="eyebrow">Settings</p>
+              <h3 id="settingsFocus">Personal setup and backup</h3>
+            </div>
+            <span id="settingsStatus" class="settings-status">Saved</span>
+          </div>
+          <div class="settings-grid">
+            <label>
+              <span>Name</span>
+              <input id="profileName" type="text" placeholder="Optional" maxlength="40">
+            </label>
+            <label>
+              <span>Language</span>
+              <select id="languageSelect">
+                <option value="en">English</option>
+                <option value="ru">Russian / translit</option>
+              </select>
+            </label>
+            <label>
+              <span>Currency</span>
+              <select id="currencySelect">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="RUB">RUB</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </label>
+            <button id="exportBtn">Export backup</button>
+            <button id="importBtn">Import backup</button>
+            <input id="importFile" type="file" accept="application/json,.json" hidden>
+          </div>
+        </section>
+
+        <section class="content">
+          <div class="list-header">
+            <h3 id="listTitle">What matters now</h3>
+            <div class="segmented" role="group" aria-label="Filter">
+              <button class="segment active" data-filter="all">All</button>
+              <button class="segment" data-filter="open">Open</button>
+              <button class="segment" data-filter="done">Done</button>
+            </div>
+          </div>
+          <div id="itemList" class="item-list" aria-live="polite"></div>
+        </section>
+      </section>
+    </main>
+
+    <template id="itemTemplate">
+      <article class="life-item">
+        <button class="check" title="Toggle done"></button>
+        <div class="item-main">
+          <div class="item-line">
+            <h4></h4>
+            <span class="tag"></span>
+          </div>
+          <p></p>
+        </div>
+        <div class="item-meta">
+          <span class="score"></span>
+          <button class="delete" title="Delete">x</button>
+        </div>
+      </article>
+    </template>
+
+    <template id="previewTemplate">
+      <article class="preview-item">
+        <span class="preview-tag"></span>
+        <strong></strong>
+        <small></small>
+      </article>
+    </template>
+
+    <template id="planTemplate">
+      <article class="plan-step">
+        <span class="step-number"></span>
+        <div>
+          <strong></strong>
+          <p></p>
+        </div>
+      </article>
+    </template>
+
+    <template id="radarTemplate">
+      <button class="radar-card" type="button">
+        <span class="radar-card-top">
+          <strong></strong>
+          <em></em>
+        </span>
+        <span class="radar-card-copy"></span>
+      </button>
+    </template>
+
+    <template id="notifyTemplate">
+      <article class="notify-item">
+        <span></span>
+        <div>
+          <strong></strong>
+          <p></p>
+        </div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
