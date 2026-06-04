@@ -14,6 +14,9 @@ const els = {
   category: document.getElementById("itemCategory"),
   impact: document.getElementById("itemImpact"),
   date: document.getElementById("itemDate"),
+  attachment: document.getElementById("itemAttachment"),
+  attach: document.getElementById("attachBtn"),
+  attachmentStatus: document.getElementById("attachmentStatus"),
   add: document.getElementById("addBtn"),
   seed: document.getElementById("seedBtn"),
   clearDone: document.getElementById("clearDoneBtn"),
@@ -61,6 +64,8 @@ let captureTimer = null;
 let deferredInstallPrompt = null;
 let recognition = null;
 let isListening = false;
+let pendingAttachment = null;
+const maxAttachmentBytes = 4 * 1024 * 1024;
 
 const viewLabels = {
   today: ["viewTodayTitle", "listTodayTitle"],
@@ -90,6 +95,13 @@ const translations = {
     impactMedium: "Vidutinis",
     impactLow: "Zemas",
     add: "Prideti",
+    attachFile: "Prisegti",
+    noAttachment: "Dokumentas nepridetas",
+    attachedFile: "Prideta: {name}",
+    attachmentTooLarge: "Failas per didelis. Maks. 4MB.",
+    attachmentReadError: "Failo nepavyko ikelti.",
+    openAttachment: "Atidaryti dokumenta",
+    removeAttachment: "Nuimti",
     brainTitle: "Minciu surinkimas",
     brainCopy: "Irasyk netvarkingas pastabas. LifePilot pavers jas prioritetais su datomis.",
     brainPlaceholder: "Pavyzdys: apmoketi nuoma rytoj, pratesti draudima, uzsirasyti pas gydytoja pirmadieni",
@@ -220,6 +232,13 @@ const translations = {
     impactMedium: "Medium",
     impactLow: "Low",
     add: "Add",
+    attachFile: "Attach",
+    noAttachment: "No document attached",
+    attachedFile: "Attached: {name}",
+    attachmentTooLarge: "File is too large. Max 4MB.",
+    attachmentReadError: "Could not load this file.",
+    openAttachment: "Open document",
+    removeAttachment: "Remove",
     brainTitle: "Brain dump",
     brainCopy: "Paste messy life notes. LifePilot turns them into dated priorities.",
     brainPlaceholder: "Example: oplati arendu zavtra, prodli strahovku, pozvoni vrachu v ponedelnik",
@@ -350,6 +369,13 @@ const translations = {
     impactMedium: "Srednii",
     impactLow: "Nizkii",
     add: "Dobavit",
+    attachFile: "Prikrepit",
+    noAttachment: "Dokument ne prikreplen",
+    attachedFile: "Prikreplen: {name}",
+    attachmentTooLarge: "Fail slishkom bolshoi. Maks. 4MB.",
+    attachmentReadError: "Ne poluchilos zagruzit fail.",
+    openAttachment: "Otkryt dokument",
+    removeAttachment: "Ubrat",
     brainTitle: "Zapisi iz golovy",
     brainCopy: "Vstav gryaznye zametki. LifePilot prevratit ih v prioritety s datami.",
     brainPlaceholder: "Primer: oplati arendu zavtra, prodli strahovku, pozvoni vrachu v ponedelnik",
@@ -493,6 +519,11 @@ function applyLanguage() {
   document.querySelectorAll("[data-i18n-placeholder]").forEach(node => {
     node.placeholder = t(node.dataset.i18nPlaceholder);
   });
+  if (pendingAttachment) {
+    setAttachmentStatus(t("attachedFile", { name: pendingAttachment.name }), "saved");
+  } else {
+    setAttachmentStatus(t("noAttachment"));
+  }
 }
 
 function categoryLabel(category) {
@@ -610,7 +641,7 @@ function planReason(item) {
 }
 
 function addItem() {
-  const title = els.title.value.trim();
+  const title = els.title.value.trim() || pendingAttachment?.name || "";
   if (!title) return;
 
   state.items.push({
@@ -619,14 +650,55 @@ function addItem() {
     category: els.category.value,
     impact: Number(els.impact.value),
     date: els.date.value || todayIso(),
+    attachment: pendingAttachment,
     done: false,
     createdAt: Date.now()
   });
 
   els.title.value = "";
   els.date.value = "";
+  clearPendingAttachment();
   saveItems();
   render();
+}
+
+function readAttachment(file) {
+  if (!file) return;
+  if (file.size > maxAttachmentBytes) {
+    pendingAttachment = null;
+    els.attachment.value = "";
+    setAttachmentStatus(t("attachmentTooLarge"), "error");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    pendingAttachment = {
+      name: file.name,
+      type: file.type || "application/octet-stream",
+      size: file.size,
+      dataUrl: reader.result
+    };
+    setAttachmentStatus(t("attachedFile", { name: file.name }), "saved");
+  });
+  reader.addEventListener("error", () => {
+    pendingAttachment = null;
+    els.attachment.value = "";
+    setAttachmentStatus(t("attachmentReadError"), "error");
+  });
+  reader.readAsDataURL(file);
+}
+
+function clearPendingAttachment() {
+  pendingAttachment = null;
+  els.attachment.value = "";
+  setAttachmentStatus(t("noAttachment"));
+}
+
+function setAttachmentStatus(text, mode = "idle") {
+  els.attachmentStatus.textContent = text;
+  els.attachmentStatus.classList.toggle("error", mode === "error");
+  els.attachmentStatus.classList.toggle("saved", mode === "saved");
 }
 
 function analyzeDump() {
@@ -955,6 +1027,7 @@ function renderList() {
     node.querySelector("p").textContent = explain(item);
     node.querySelector(".tag").textContent = categoryLabel(item.category);
     node.querySelector(".tag").style.background = tagColors[item.category] || tagColors.admin;
+    renderItemAttachment(node, item);
     node.querySelector(".score").textContent = score;
     node.querySelector(".score").classList.toggle("hot", score >= 78);
     node.querySelector(".score").classList.toggle("warm", score >= 55 && score < 78);
@@ -962,6 +1035,26 @@ function renderList() {
     node.querySelector(".delete").addEventListener("click", () => deleteItem(item.id));
     els.itemList.append(node);
   });
+}
+
+function renderItemAttachment(node, item) {
+  const container = node.querySelector(".attachment-link");
+  if (!item.attachment?.dataUrl) {
+    container.hidden = true;
+    container.innerHTML = "";
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = item.attachment.dataUrl;
+  link.download = item.attachment.name || "lifepilot-document";
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = `${t("openAttachment")}: ${item.attachment.name || "document"}`;
+
+  container.hidden = false;
+  container.innerHTML = "";
+  container.append(link);
 }
 
 function renderCapturePreview() {
@@ -1133,8 +1226,20 @@ function normalizeImportedItem(item) {
     category: ["admin", "money", "docs", "health", "work"].includes(item.category) ? item.category : "admin",
     impact: [1, 2, 3].includes(Number(item.impact)) ? Number(item.impact) : 2,
     date: item.date || todayIso(),
+    attachment: normalizeAttachment(item.attachment),
     done: Boolean(item.done),
     createdAt: Number(item.createdAt) || Date.now()
+  };
+}
+
+function normalizeAttachment(attachment) {
+  if (!attachment || typeof attachment !== "object") return null;
+  if (typeof attachment.dataUrl !== "string" || !attachment.dataUrl.startsWith("data:")) return null;
+  return {
+    name: typeof attachment.name === "string" ? attachment.name.slice(0, 120) : "document",
+    type: typeof attachment.type === "string" ? attachment.type.slice(0, 80) : "application/octet-stream",
+    size: Number(attachment.size) || 0,
+    dataUrl: attachment.dataUrl
   };
 }
 
@@ -1316,6 +1421,8 @@ els.add.addEventListener("click", addItem);
 els.title.addEventListener("keydown", event => {
   if (event.key === "Enter") addItem();
 });
+els.attach.addEventListener("click", () => els.attachment.click());
+els.attachment.addEventListener("change", () => readAttachment(els.attachment.files[0]));
 els.seed.addEventListener("click", seedItems);
 els.plan.addEventListener("click", buildDailyPlan);
 els.notify.addEventListener("click", enableNotifications);

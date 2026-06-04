@@ -209,7 +209,7 @@ h2 {
 
 .quick-add {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) 130px 120px 150px 92px;
+  grid-template-columns: minmax(180px, 1fr) 130px 120px 150px 110px 92px;
   gap: 10px;
   padding: 12px;
   box-shadow: var(--shadow);
@@ -232,6 +232,21 @@ h2 {
   color: #fff;
   background: var(--ink);
   font-weight: 800;
+}
+
+.attachment-status {
+  grid-column: 1 / -1;
+  min-height: 24px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.attachment-status.saved {
+  color: var(--green);
+}
+
+.attachment-status.error {
+  color: var(--red);
 }
 
 .brain-dump {
@@ -801,6 +816,26 @@ h2 {
 .life-item p {
   margin-top: 5px;
   font-size: 0.88rem;
+}
+
+.attachment-link {
+  margin-top: 7px;
+}
+
+.attachment-link a {
+  display: inline-flex;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(35, 100, 170, 0.24);
+  border-radius: 7px;
+  padding: 6px 8px;
+  color: var(--blue);
+  background: rgba(35, 100, 170, 0.07);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-meta {

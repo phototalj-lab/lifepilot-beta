@@ -74,7 +74,10 @@
             <option value="1" data-i18n="impactLow">Low</option>
           </select>
           <input id="itemDate" type="date" aria-label="Due date">
+          <input id="itemAttachment" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx,.xls,.xlsx,application/pdf,image/*,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+          <button id="attachBtn" type="button" data-i18n="attachFile">Attach</button>
           <button id="addBtn" data-i18n="add">Add</button>
+          <span id="attachmentStatus" class="attachment-status" data-i18n="noAttachment">No document attached</span>
         </section>
 
         <section class="brain-dump" aria-label="Smart capture">
@@ -210,6 +213,7 @@
             <span class="tag"></span>
           </div>
           <p></p>
+          <div class="attachment-link" hidden></div>
         </div>
         <div class="item-meta">
           <span class="score"></span>
