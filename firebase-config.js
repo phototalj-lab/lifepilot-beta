@@ -1,11 +1,11 @@
 window.LifePilotFirebase = {
-  enabled: false,
+  enabled: true,
   firebaseConfig: {
-    apiKey: "PASTE_API_KEY",
-    authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-    projectId: "PASTE_PROJECT_ID",
-    storageBucket: "PASTE_PROJECT_ID.firebasestorage.app",
-    messagingSenderId: "PASTE_SENDER_ID",
-    appId: "PASTE_APP_ID"
+    apiKey: "AIzaSyCNooOrVR3g5lZwSFLABaGhOdgqgz_clOQ",
+    authDomain: "lifepilot-phototalj.firebaseapp.com",
+    projectId: "lifepilot-phototalj",
+    storageBucket: "lifepilot-phototalj.firebasestorage.app",
+    messagingSenderId: "963125589005",
+    appId: "1:963125589005:web:3ddda01adb531d203f5144"
   }
 };

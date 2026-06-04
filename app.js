@@ -105,6 +105,7 @@ const translations = {
     attachedFile: "Prideta: {name}",
     attachmentTooLarge: "Failas per didelis. Maks. 4MB.",
     attachmentReadError: "Failo nepavyko ikelti.",
+    attachmentLocalOnly: "Dokumentas liko lokaliai. Firebase Storage reikia Blaze plano.",
     openAttachment: "Atidaryti dokumenta",
     removeAttachment: "Nuimti",
     brainTitle: "Minciu surinkimas",
@@ -259,6 +260,7 @@ const translations = {
     attachedFile: "Attached: {name}",
     attachmentTooLarge: "File is too large. Max 4MB.",
     attachmentReadError: "Could not load this file.",
+    attachmentLocalOnly: "Document stayed local. Firebase Storage needs the Blaze plan.",
     openAttachment: "Open document",
     removeAttachment: "Remove",
     brainTitle: "Brain dump",
@@ -413,6 +415,7 @@ const translations = {
     attachedFile: "Prikreplen: {name}",
     attachmentTooLarge: "Fail slishkom bolshoi. Maks. 4MB.",
     attachmentReadError: "Ne poluchilos zagruzit fail.",
+    attachmentLocalOnly: "Dokument ostalsya lokalno. Firebase Storage trebuet Blaze plan.",
     openAttachment: "Otkryt dokument",
     removeAttachment: "Ubrat",
     brainTitle: "Zapisi iz golovy",
@@ -744,10 +747,7 @@ async function addItem() {
       attachment = await window.LifePilotCloud.uploadAttachment(attachment);
     } catch (error) {
       console.warn("LifePilot attachment upload failed", error);
-      setAttachmentStatus(t("attachmentReadError"), "error");
-      els.add.disabled = false;
-      els.attach.disabled = false;
-      return;
+      setAttachmentStatus(t("attachmentLocalOnly"), "error");
     }
   }
 
