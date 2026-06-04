@@ -188,6 +188,17 @@
             <button id="importBtn" data-i18n="importBackup">Import backup</button>
             <input id="importFile" type="file" accept="application/json,.json" hidden>
           </div>
+          <div class="cloud-panel">
+            <div>
+              <p class="eyebrow" data-i18n="cloudEyebrow">Cloud Sync</p>
+              <h3 id="cloudFocus">Firebase is not connected</h3>
+              <p id="cloudHint">Add Firebase config to enable cross-device sync.</p>
+            </div>
+            <div class="cloud-actions">
+              <span id="cloudStatus" class="cloud-status">Off</span>
+              <button id="cloudSyncBtn" type="button" data-i18n="cloudSyncNow">Sync now</button>
+            </div>
+          </div>
         </section>
 
         <section class="content">
@@ -260,6 +271,8 @@
       </article>
     </template>
 
+    <script src="firebase-config.js"></script>
+    <script src="firebase-sync.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

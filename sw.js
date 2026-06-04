@@ -1,9 +1,11 @@
-const cacheName = "lifepilot-shell-v1";
+const cacheName = "lifepilot-shell-v2";
 const shellFiles = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./firebase-config.js",
+  "./firebase-sync.js",
   "./manifest.webmanifest",
   "./icon.svg"
 ];

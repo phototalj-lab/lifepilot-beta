@@ -47,6 +47,10 @@ const els = {
   importFile: document.getElementById("importFile"),
   settingsFocus: document.getElementById("settingsFocus"),
   settingsStatus: document.getElementById("settingsStatus"),
+  cloudFocus: document.getElementById("cloudFocus"),
+  cloudHint: document.getElementById("cloudHint"),
+  cloudStatus: document.getElementById("cloudStatus"),
+  cloudSync: document.getElementById("cloudSyncBtn"),
   itemList: document.getElementById("itemList"),
   template: document.getElementById("itemTemplate"),
   previewTemplate: document.getElementById("previewTemplate"),
@@ -66,6 +70,7 @@ let recognition = null;
 let isListening = false;
 let pendingAttachment = null;
 const maxAttachmentBytes = 4 * 1024 * 1024;
+let suppressCloudSave = false;
 
 const viewLabels = {
   today: ["viewTodayTitle", "listTodayTitle"],
@@ -210,7 +215,24 @@ const translations = {
     alertBody: "Priminsiu apie skubias uzduotis, kol programa atidaryta.",
     testTitle: "LifePilot testas",
     testBody: "Pranesimai veikia sioje narsykleje.",
-    settingsFocus: "Asmeniniai nustatymai ir atsargine kopija"
+    settingsFocus: "Asmeniniai nustatymai ir atsargine kopija",
+    cloudEyebrow: "Cloud Sync",
+    cloudSyncNow: "Sinchronizuoti",
+    cloudOffTitle: "Firebase neprijungtas",
+    cloudOffHint: "Irasyk Firebase config, kad veiktu sync tarp irenginiu.",
+    cloudReadyTitle: "Firebase paruostas",
+    cloudReadyHint: "Spausk sync arba palauk auto sinchronizacijos.",
+    cloudConnectingTitle: "Jungiu Firebase...",
+    cloudOnlineTitle: "Cloud sync ijungtas",
+    cloudOnlineHint: "Uzduotys ir nustatymai saugomi Firestore.",
+    cloudSyncingTitle: "Sinchronizuoju...",
+    cloudErrorTitle: "Cloud sync klaida",
+    cloudStatusOff: "Off",
+    cloudStatusReady: "Ready",
+    cloudStatusConnecting: "Connecting",
+    cloudStatusOnline: "Online",
+    cloudStatusSyncing: "Syncing",
+    cloudStatusError: "Error"
   },
   en: {
     brandSubtitle: "Daily control room",
@@ -347,7 +369,24 @@ const translations = {
     alertBody: "I will remind you about urgent tasks while this app is open.",
     testTitle: "LifePilot test",
     testBody: "Notifications are working in this browser.",
-    settingsFocus: "Personal setup and backup"
+    settingsFocus: "Personal setup and backup",
+    cloudEyebrow: "Cloud Sync",
+    cloudSyncNow: "Sync now",
+    cloudOffTitle: "Firebase is not connected",
+    cloudOffHint: "Add Firebase config to enable cross-device sync.",
+    cloudReadyTitle: "Firebase is ready",
+    cloudReadyHint: "Tap sync or wait for autosync.",
+    cloudConnectingTitle: "Connecting Firebase...",
+    cloudOnlineTitle: "Cloud sync is on",
+    cloudOnlineHint: "Tasks and settings are backed by Firestore.",
+    cloudSyncingTitle: "Syncing...",
+    cloudErrorTitle: "Cloud sync error",
+    cloudStatusOff: "Off",
+    cloudStatusReady: "Ready",
+    cloudStatusConnecting: "Connecting",
+    cloudStatusOnline: "Online",
+    cloudStatusSyncing: "Syncing",
+    cloudStatusError: "Error"
   },
   ru: {
     brandSubtitle: "Panel na kazhdyi den",
@@ -484,7 +523,24 @@ const translations = {
     alertBody: "Budu napominat o srochnyh delah, poka prilozhenie otkryto.",
     testTitle: "LifePilot test",
     testBody: "Uvedomleniya rabotayut v etom brauzere.",
-    settingsFocus: "Lichnye nastroiki i backup"
+    settingsFocus: "Lichnye nastroiki i backup",
+    cloudEyebrow: "Cloud Sync",
+    cloudSyncNow: "Sync",
+    cloudOffTitle: "Firebase ne podklyuchen",
+    cloudOffHint: "Vstav Firebase config, chtoby vklyuchit sync mezhdu ustroistvami.",
+    cloudReadyTitle: "Firebase gotov",
+    cloudReadyHint: "Nazhmi sync ili dozhdis autosync.",
+    cloudConnectingTitle: "Podklyuchayu Firebase...",
+    cloudOnlineTitle: "Cloud sync vklyuchen",
+    cloudOnlineHint: "Dela i nastroiki hranyatsya v Firestore.",
+    cloudSyncingTitle: "Sinhroniziruyu...",
+    cloudErrorTitle: "Cloud sync oshibka",
+    cloudStatusOff: "Off",
+    cloudStatusReady: "Ready",
+    cloudStatusConnecting: "Connecting",
+    cloudStatusOnline: "Online",
+    cloudStatusSyncing: "Syncing",
+    cloudStatusError: "Error"
   }
 };
 
@@ -565,6 +621,7 @@ function starterItems() {
 
 function saveItems() {
   localStorage.setItem(storeKey, JSON.stringify(state.items));
+  scheduleCloudSave();
 }
 
 function loadSettings() {
@@ -579,6 +636,40 @@ function loadSettings() {
 
 function saveSettings() {
   localStorage.setItem(settingsKey, JSON.stringify(state.settings));
+  scheduleCloudSave();
+}
+
+function cloudPayload() {
+  return {
+    settings: state.settings,
+    items: state.items
+  };
+}
+
+function scheduleCloudSave(immediate = false) {
+  if (suppressCloudSave) return;
+  const cloud = window.LifePilotCloud;
+  if (!cloud?.isConfigured?.()) return;
+  cloud.save(cloudPayload(), immediate);
+}
+
+function applyCloudPayload(payload) {
+  if (!payload || !Array.isArray(payload.items)) return;
+  const run = () => {
+    suppressCloudSave = true;
+    state.items = payload.items.map(normalizeImportedItem).filter(Boolean);
+    state.settings = { ...state.settings, ...(payload.settings && typeof payload.settings === "object" ? payload.settings : {}) };
+    localStorage.setItem(storeKey, JSON.stringify(state.items));
+    localStorage.setItem(settingsKey, JSON.stringify(state.settings));
+    suppressCloudSave = false;
+    render();
+  };
+
+  if (window.LifePilotCloud?.withRemoteApply) {
+    window.LifePilotCloud.withRemoteApply(run);
+  } else {
+    run();
+  }
 }
 
 function loadNotified() {
@@ -640,9 +731,25 @@ function planReason(item) {
   return reasons.slice(0, 3).join(", ");
 }
 
-function addItem() {
+async function addItem() {
   const title = els.title.value.trim() || pendingAttachment?.name || "";
   if (!title) return;
+  els.add.disabled = true;
+  els.attach.disabled = true;
+
+  let attachment = pendingAttachment;
+  if (attachment?.dataUrl && window.LifePilotCloud?.isConfigured?.()) {
+    setAttachmentStatus(t("cloudSyncingTitle"), "saved");
+    try {
+      attachment = await window.LifePilotCloud.uploadAttachment(attachment);
+    } catch (error) {
+      console.warn("LifePilot attachment upload failed", error);
+      setAttachmentStatus(t("attachmentReadError"), "error");
+      els.add.disabled = false;
+      els.attach.disabled = false;
+      return;
+    }
+  }
 
   state.items.push({
     id: crypto.randomUUID(),
@@ -650,7 +757,7 @@ function addItem() {
     category: els.category.value,
     impact: Number(els.impact.value),
     date: els.date.value || todayIso(),
-    attachment: pendingAttachment,
+    attachment,
     done: false,
     createdAt: Date.now()
   });
@@ -660,6 +767,8 @@ function addItem() {
   clearPendingAttachment();
   saveItems();
   render();
+  els.add.disabled = false;
+  els.attach.disabled = false;
 }
 
 function readAttachment(file) {
@@ -1039,14 +1148,15 @@ function renderList() {
 
 function renderItemAttachment(node, item) {
   const container = node.querySelector(".attachment-link");
-  if (!item.attachment?.dataUrl) {
+  const href = item.attachment?.dataUrl || item.attachment?.url;
+  if (!href) {
     container.hidden = true;
     container.innerHTML = "";
     return;
   }
 
   const link = document.createElement("a");
-  link.href = item.attachment.dataUrl;
+  link.href = href;
   link.download = item.attachment.name || "lifepilot-document";
   link.target = "_blank";
   link.rel = "noopener";
@@ -1151,9 +1261,47 @@ function renderSettings() {
   els.language.value = state.settings.language;
   els.currency.value = state.settings.currency;
   els.settingsFocus.textContent = t("settingsFocus");
+  renderCloudStatus(lastCloudStatus);
   if (!els.settingsStatus.classList.contains("warn") && !els.settingsStatus.classList.contains("error")) {
     els.settingsStatus.textContent = t("saved");
   }
+}
+
+let lastCloudStatus = { status: window.LifePilotCloud?.isConfigured?.() ? "ready" : "off", detail: "" };
+
+function renderCloudStatus(detail = lastCloudStatus) {
+  lastCloudStatus = detail || lastCloudStatus;
+  const status = lastCloudStatus.status || "off";
+  const titleKey = {
+    off: "cloudOffTitle",
+    ready: "cloudReadyTitle",
+    connecting: "cloudConnectingTitle",
+    online: "cloudOnlineTitle",
+    syncing: "cloudSyncingTitle",
+    error: "cloudErrorTitle"
+  }[status] || "cloudOffTitle";
+  const hintKey = {
+    off: "cloudOffHint",
+    ready: "cloudReadyHint",
+    connecting: "cloudReadyHint",
+    online: "cloudOnlineHint",
+    syncing: "cloudOnlineHint",
+    error: "cloudOffHint"
+  }[status] || "cloudOffHint";
+  const statusKey = {
+    off: "cloudStatusOff",
+    ready: "cloudStatusReady",
+    connecting: "cloudStatusConnecting",
+    online: "cloudStatusOnline",
+    syncing: "cloudStatusSyncing",
+    error: "cloudStatusError"
+  }[status] || "cloudStatusOff";
+
+  els.cloudFocus.textContent = t(titleKey);
+  els.cloudHint.textContent = lastCloudStatus.detail || t(hintKey);
+  els.cloudStatus.textContent = t(statusKey);
+  els.cloudStatus.className = `cloud-status ${status}`;
+  els.cloudSync.disabled = status === "off" || status === "connecting" || status === "syncing";
 }
 
 function setSettingsStatus(text, mode = "saved") {
@@ -1234,12 +1382,16 @@ function normalizeImportedItem(item) {
 
 function normalizeAttachment(attachment) {
   if (!attachment || typeof attachment !== "object") return null;
-  if (typeof attachment.dataUrl !== "string" || !attachment.dataUrl.startsWith("data:")) return null;
+  const dataUrl = typeof attachment.dataUrl === "string" && attachment.dataUrl.startsWith("data:") ? attachment.dataUrl : null;
+  const url = typeof attachment.url === "string" && /^https?:\/\//.test(attachment.url) ? attachment.url : null;
+  if (!dataUrl && !url) return null;
   return {
     name: typeof attachment.name === "string" ? attachment.name.slice(0, 120) : "document",
     type: typeof attachment.type === "string" ? attachment.type.slice(0, 80) : "application/octet-stream",
     size: Number(attachment.size) || 0,
-    dataUrl: attachment.dataUrl
+    dataUrl,
+    url,
+    path: typeof attachment.path === "string" ? attachment.path.slice(0, 240) : null
   };
 }
 
@@ -1434,6 +1586,14 @@ els.currency.addEventListener("change", () => updateSetting("currency", els.curr
 els.exportData.addEventListener("click", exportBackup);
 els.importData.addEventListener("click", () => els.importFile.click());
 els.importFile.addEventListener("change", () => importBackupFile(els.importFile.files[0]));
+els.cloudSync.addEventListener("click", async () => {
+  if (!window.LifePilotCloud?.isConfigured?.()) {
+    renderCloudStatus({ status: "off", detail: t("cloudOffHint") });
+    return;
+  }
+  await window.LifePilotCloud.pull();
+  scheduleCloudSave(true);
+});
 els.capture.addEventListener("click", analyzeDump);
 els.voice.addEventListener("click", startVoiceInput);
 els.acceptCapture.addEventListener("click", acceptParsedItems);
@@ -1462,7 +1622,20 @@ window.addEventListener("appinstalled", () => {
   els.install.hidden = true;
 });
 
+window.addEventListener("lifepilot-cloud-status", event => {
+  renderCloudStatus(event.detail);
+});
+
+window.LifePilotApp = {
+  getCloudPayload: cloudPayload,
+  applyCloudPayload,
+  renderCloudStatus
+};
+
 registerServiceWorker();
 render();
+if (window.LifePilotCloud?.isConfigured?.()) {
+  window.LifePilotCloud.pull();
+}
 setInterval(checkDueNotifications, 60000);
 setTimeout(checkDueNotifications, 2000);

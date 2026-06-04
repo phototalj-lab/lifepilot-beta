@@ -719,6 +719,73 @@ h2 {
   font-weight: 800;
 }
 
+.cloud-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px;
+  background: #fbfcfd;
+}
+
+.cloud-panel h3 {
+  font-size: 1rem;
+}
+
+.cloud-panel p:last-child {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.cloud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cloud-status {
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #fff;
+  background: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cloud-status.ready,
+.cloud-status.connecting,
+.cloud-status.syncing {
+  background: var(--amber);
+}
+
+.cloud-status.online {
+  background: var(--green);
+}
+
+.cloud-status.error {
+  background: var(--red);
+}
+
+.cloud-actions button {
+  min-height: 38px;
+  border: 1px solid var(--blue);
+  border-radius: 7px;
+  padding: 0 12px;
+  color: #fff;
+  background: var(--blue);
+  font-weight: 800;
+}
+
+.cloud-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 .content {
   padding: 18px;
 }
@@ -934,7 +1001,13 @@ h2 {
   .plan-head,
   .radar-head,
   .notification-head,
-  .settings-head {
+  .settings-head,
+  .cloud-panel {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cloud-actions {
     align-items: stretch;
     flex-direction: column;
   }
