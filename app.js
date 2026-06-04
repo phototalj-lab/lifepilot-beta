@@ -63,10 +63,403 @@ let recognition = null;
 let isListening = false;
 
 const viewLabels = {
-  today: ["Today priority map", "What matters now"],
-  money: ["Money watch", "Costs, bills and risk"],
-  docs: ["Document radar", "Papers and deadlines"],
-  health: ["Health line", "Appointments and routines"]
+  today: ["viewTodayTitle", "listTodayTitle"],
+  money: ["viewMoneyTitle", "listMoneyTitle"],
+  docs: ["viewDocsTitle", "listDocsTitle"],
+  health: ["viewHealthTitle", "listHealthTitle"]
+};
+
+const translations = {
+  lt: {
+    brandSubtitle: "Kasdienis valdymo centras",
+    navToday: "Siandien",
+    navMoney: "Pinigai",
+    navDocs: "Dok.",
+    navDocsLong: "Dokumentai",
+    navHealth: "Sveikata",
+    readiness: "Gyvenimo parengtis",
+    loadSample: "Ikrauti pavyzdzius",
+    clearCompleted: "Istrinti atliktus",
+    quickPlaceholder: "Prideti saskaita, uzduoti, dokumenta, vizita...",
+    catAdmin: "Admin",
+    catMoney: "Pinigai",
+    catDocs: "Dokumentai",
+    catHealth: "Sveikata",
+    catWork: "Darbas",
+    impactHigh: "Aukstas",
+    impactMedium: "Vidutinis",
+    impactLow: "Zemas",
+    add: "Prideti",
+    brainTitle: "Minciu surinkimas",
+    brainCopy: "Irasyk netvarkingas pastabas. LifePilot pavers jas prioritetais su datomis.",
+    brainPlaceholder: "Pavyzdys: apmoketi nuoma rytoj, pratesti draudima, uzsirasyti pas gydytoja pirmadieni",
+    voice: "Balsu",
+    listening: "Klausau",
+    voiceInput: "Balso ivedimas",
+    voiceReady: "Balso ivedimas parengtas, jei irenginys palaiko.",
+    voiceStopped: "Balso ivedimas sustabdytas.",
+    voiceAndroid: "Klausau Android telefone...",
+    voiceUnsupported: "Siame irenginyje balso ivedimas nepalaikomas.",
+    voiceFailed: "Balso ivedimas nepavyko arba leidimas atmestas.",
+    voiceNoteAdded: "Balso pastaba prideta.",
+    analyze: "Analizuoti",
+    addParsed: "Prideti rastus",
+    dailyEyebrow: "AI dienos planas",
+    planReady: "Paruosta, kai tu pasiruoses",
+    planButton: "Suplanuoti diena",
+    planEmptyStart: "Sugeneruok aisku veiksmu eiles tvarka is atviru prioritetu.",
+    urgent: "Skubu",
+    thisWeek: "Sia savaite",
+    moneyRisk: "Pinigu rizika",
+    done: "Atlikta",
+    riskRadar: "Riziku radaras",
+    notificationCenter: "Pranesimu centras",
+    installApp: "Idiegti",
+    test: "Testas",
+    settings: "Nustatymai",
+    name: "Vardas",
+    optional: "Neprivaloma",
+    language: "Kalba",
+    currency: "Valiuta",
+    exportBackup: "Eksportuoti kopija",
+    importBackup: "Importuoti kopija",
+    filterAll: "Visi",
+    filterOpen: "Atviri",
+    filterDone: "Atlikti",
+    viewTodayTitle: "Siandienos prioritetai",
+    listTodayTitle: "Kas dabar svarbiausia",
+    viewMoneyTitle: "Pinigu stebejimas",
+    listMoneyTitle: "Islaidos, saskaitos ir rizika",
+    viewDocsTitle: "Dokumentu radaras",
+    listDocsTitle: "Dokumentai ir terminai",
+    viewHealthTitle: "Sveikatos linija",
+    listHealthTitle: "Vizitai ir rutina",
+    personalNamed: "{name}, diena surusiuota pagal svarba.",
+    personalDefault: "Tavo diena, surusiuota pagal svarba.",
+    nothingHere: "Siame vaizde dar nieko nera.",
+    dueLate: "veluoja {days} d.",
+    dueToday: "terminas siandien",
+    dueIn: "terminas po {days} d.",
+    highImpact: "auksta itaka",
+    mediumImpact: "vidutine itaka",
+    lowImpact: "zema itaka",
+    clearDay: "Rami diena",
+    noOpenPriorities: "Atviru prioritetu nera. Gali minute atsikvepti.",
+    handleUrgent: "Pirmiausia sutvarkyk {count} skubu prioriteta",
+    handleUrgentMany: "Pirmiausia sutvarkyk {count} skubius prioritetus",
+    startWithCategory: "Pradek nuo {category}, tada uzbaik lengvus darbus",
+    lowerPriorityWait: " {count} zemesnio prioriteto uzduotis gali palaukti.",
+    lowerPriorityWaitMany: " {count} zemesnio prioriteto uzduociu gali palaukti.",
+    score: "Balas",
+    reasonLate: "veluoja {days} d.",
+    reasonToday: "terminas siandien",
+    reasonSoon: "terminas po {days} d.",
+    reasonMoney: "pinigu rizika",
+    reasonDocs: "dokumento terminas",
+    reasonHealth: "sveikatos apsauga",
+    reasonHigh: "auksta itaka",
+    reasonClean: "palaiko svaria savaite",
+    saved: "Issaugota",
+    exported: "Eksportuota",
+    imported: "Importuota",
+    invalidFile: "Netinkamas failas",
+    radarAct: "Pirmiausia tvarkyk raudonas zonas",
+    radarWatch: "Neleisk tam tapti skubu",
+    radarCalm: "Dideliu spaudimo tasku nera",
+    levelHigh: "Auksta rizika",
+    levelWatch: "Stebeti",
+    levelStable: "Stabilu",
+    riskOverdue: "Veluoja",
+    riskOverdueCopy: "{count} uzduotis jau praleido termina.",
+    riskOverdueCopyMany: "{count} uzduotys jau praleido termina.",
+    riskOverdueEmpty: "Praleistu terminu dabar nera.",
+    riskMoney: "Pinigai",
+    riskMoneyCopy: "{amount} galima rizika is saskaitu ir finansu uzduociu.",
+    riskMoneyEmpty: "Atviru pinigu uzduociu nera.",
+    riskDocs: "Dokumentai",
+    riskDocsCopy: "{count} dokumentu uzduotis reikia demesio sia savaite.",
+    riskDocsCopyMany: "{count} dokumentu uzduociu reikia demesio sia savaite.",
+    riskDocsEmpty: "Atviru dokumentu terminu nera.",
+    riskHealth: "Sveikata",
+    riskHealthCopy: "{count} sveikatos rutina ar vizitas laukia.",
+    riskHealthCopyMany: "{count} sveikatos rutinos ar vizitu laukia.",
+    riskHealthEmpty: "Atviru sveikatos uzduociu nera.",
+    notifyOn: "Ijungta",
+    notifyOff: "Isjungta",
+    notifyBlocked: "Blokuota",
+    notifyUnsupported: "Nepalaikoma",
+    notifyEnabled: "Pranesimai ijungti",
+    notifyEnable: "Ijungti",
+    notifyFocus: "{count} priminimas arti termino",
+    notifyFocusMany: "{count} priminimai arti termino",
+    notifyFocusEmpty: "Greitu priminimu nera",
+    notifyEmpty: "Dabar niekam nereikia priminimo.",
+    alertTitle: "LifePilot pranesimai ijungti",
+    alertBody: "Priminsiu apie skubias uzduotis, kol programa atidaryta.",
+    testTitle: "LifePilot testas",
+    testBody: "Pranesimai veikia sioje narsykleje.",
+    settingsFocus: "Asmeniniai nustatymai ir atsargine kopija"
+  },
+  en: {
+    brandSubtitle: "Daily control room",
+    navToday: "Today",
+    navMoney: "Money",
+    navDocs: "Docs",
+    navDocsLong: "Documents",
+    navHealth: "Health",
+    readiness: "Life readiness",
+    loadSample: "Load sample data",
+    clearCompleted: "Clear completed",
+    quickPlaceholder: "Add bill, task, document, appointment...",
+    catAdmin: "Admin",
+    catMoney: "Money",
+    catDocs: "Docs",
+    catHealth: "Health",
+    catWork: "Work",
+    impactHigh: "High",
+    impactMedium: "Medium",
+    impactLow: "Low",
+    add: "Add",
+    brainTitle: "Brain dump",
+    brainCopy: "Paste messy life notes. LifePilot turns them into dated priorities.",
+    brainPlaceholder: "Example: oplati arendu zavtra, prodli strahovku, pozvoni vrachu v ponedelnik",
+    voice: "Voice",
+    listening: "Listening",
+    voiceInput: "Voice input",
+    voiceReady: "Voice input is ready when supported.",
+    voiceStopped: "Voice input stopped.",
+    voiceAndroid: "Listening on Android...",
+    voiceUnsupported: "Voice input is not supported on this device.",
+    voiceFailed: "Voice input failed or permission was denied.",
+    voiceNoteAdded: "Voice note added.",
+    analyze: "Analyze",
+    addParsed: "Add parsed",
+    dailyEyebrow: "AI Daily Plan",
+    planReady: "Ready when you are",
+    planButton: "Plan my day",
+    planEmptyStart: "Generate a clear order of action from your open priorities.",
+    urgent: "Urgent",
+    thisWeek: "This week",
+    moneyRisk: "Money risk",
+    done: "Done",
+    riskRadar: "Risk Radar",
+    notificationCenter: "Notification Center",
+    installApp: "Install app",
+    test: "Test",
+    settings: "Settings",
+    name: "Name",
+    optional: "Optional",
+    language: "Language",
+    currency: "Currency",
+    exportBackup: "Export backup",
+    importBackup: "Import backup",
+    filterAll: "All",
+    filterOpen: "Open",
+    filterDone: "Done",
+    viewTodayTitle: "Today priority map",
+    listTodayTitle: "What matters now",
+    viewMoneyTitle: "Money watch",
+    listMoneyTitle: "Costs, bills and risk",
+    viewDocsTitle: "Document radar",
+    listDocsTitle: "Papers and deadlines",
+    viewHealthTitle: "Health line",
+    listHealthTitle: "Appointments and routines",
+    personalNamed: "{name}, your day is sorted by what matters.",
+    personalDefault: "Your day, sorted by what matters.",
+    nothingHere: "Nothing in this view yet.",
+    dueLate: "{days} days late",
+    dueToday: "due today",
+    dueIn: "due in {days} days",
+    highImpact: "high impact",
+    mediumImpact: "medium impact",
+    lowImpact: "low impact",
+    clearDay: "Clear day",
+    noOpenPriorities: "No open priorities. You can breathe for a minute.",
+    handleUrgent: "Handle {count} urgent priority first",
+    handleUrgentMany: "Handle {count} urgent priorities first",
+    startWithCategory: "Start with {category}, then clear the easy wins",
+    lowerPriorityWait: " {count} lower priority item can wait.",
+    lowerPriorityWaitMany: " {count} lower priority items can wait.",
+    score: "Score",
+    reasonLate: "{days} days late",
+    reasonToday: "due today",
+    reasonSoon: "due in {days} days",
+    reasonMoney: "money risk",
+    reasonDocs: "document deadline",
+    reasonHealth: "health protection",
+    reasonHigh: "high impact",
+    reasonClean: "keeps the week clean",
+    saved: "Saved",
+    exported: "Exported",
+    imported: "Imported",
+    invalidFile: "Invalid file",
+    radarAct: "Act on red zones first",
+    radarWatch: "Keep these from becoming urgent",
+    radarCalm: "No major pressure points",
+    levelHigh: "High risk",
+    levelWatch: "Watch",
+    levelStable: "Stable",
+    riskOverdue: "Overdue",
+    riskOverdueCopy: "{count} item already past due.",
+    riskOverdueCopyMany: "{count} items already past due.",
+    riskOverdueEmpty: "No missed deadlines right now.",
+    riskMoney: "Money",
+    riskMoneyCopy: "{amount} estimated exposure from bills and finance tasks.",
+    riskMoneyEmpty: "No money tasks open.",
+    riskDocs: "Documents",
+    riskDocsCopy: "{count} document task needs attention this week.",
+    riskDocsCopyMany: "{count} document tasks need attention this week.",
+    riskDocsEmpty: "No document deadlines open.",
+    riskHealth: "Health",
+    riskHealthCopy: "{count} health routine or appointment task waiting.",
+    riskHealthCopyMany: "{count} health routine or appointment tasks waiting.",
+    riskHealthEmpty: "No health tasks open.",
+    notifyOn: "On",
+    notifyOff: "Off",
+    notifyBlocked: "Blocked",
+    notifyUnsupported: "Unsupported",
+    notifyEnabled: "Alerts enabled",
+    notifyEnable: "Enable alerts",
+    notifyFocus: "{count} reminder in range",
+    notifyFocusMany: "{count} reminders in range",
+    notifyFocusEmpty: "No reminders due soon",
+    notifyEmpty: "Nothing needs a reminder right now.",
+    alertTitle: "LifePilot alerts enabled",
+    alertBody: "I will remind you about urgent tasks while this app is open.",
+    testTitle: "LifePilot test",
+    testBody: "Notifications are working in this browser.",
+    settingsFocus: "Personal setup and backup"
+  },
+  ru: {
+    brandSubtitle: "Panel na kazhdyi den",
+    navToday: "Segodnya",
+    navMoney: "Dengi",
+    navDocs: "Doky",
+    navDocsLong: "Dokumenty",
+    navHealth: "Zdorovie",
+    readiness: "Gotovnost k zhizni",
+    loadSample: "Zagruzit primer",
+    clearCompleted: "Ubrat gotovye",
+    quickPlaceholder: "Dobavit schet, delo, dokument, vizit...",
+    catAdmin: "Admin",
+    catMoney: "Dengi",
+    catDocs: "Dokumenty",
+    catHealth: "Zdorovie",
+    catWork: "Rabota",
+    impactHigh: "Vysokii",
+    impactMedium: "Srednii",
+    impactLow: "Nizkii",
+    add: "Dobavit",
+    brainTitle: "Zapisi iz golovy",
+    brainCopy: "Vstav gryaznye zametki. LifePilot prevratit ih v prioritety s datami.",
+    brainPlaceholder: "Primer: oplati arendu zavtra, prodli strahovku, pozvoni vrachu v ponedelnik",
+    voice: "Golos",
+    listening: "Slushayu",
+    voiceInput: "Golosovoi vvod",
+    voiceReady: "Golosovoi vvod gotov, esli ustroistvo podderzhivaet.",
+    voiceStopped: "Golosovoi vvod ostanovlen.",
+    voiceAndroid: "Slushayu na Android...",
+    voiceUnsupported: "Golosovoi vvod na etom ustroistve ne podderzhivaetsya.",
+    voiceFailed: "Golosovoi vvod ne srabotal ili net razresheniya.",
+    voiceNoteAdded: "Golosovaya zametka dobavlena.",
+    analyze: "Analiz",
+    addParsed: "Dobavit naidennye",
+    dailyEyebrow: "AI plan dnya",
+    planReady: "Gotov, kogda ty gotov",
+    planButton: "Plan na den",
+    planEmptyStart: "Soberi ponyatnyi poryadok deistvii iz otkrytyh prioritetov.",
+    urgent: "Srochno",
+    thisWeek: "Na etoi nedele",
+    moneyRisk: "Deneznyi risk",
+    done: "Gotovo",
+    riskRadar: "Radar riskov",
+    notificationCenter: "Centr uvedomlenii",
+    installApp: "Ustanovit",
+    test: "Test",
+    settings: "Nastroiki",
+    name: "Imya",
+    optional: "Neobyazatelno",
+    language: "Yazyk",
+    currency: "Valyuta",
+    exportBackup: "Eksport backup",
+    importBackup: "Import backup",
+    filterAll: "Vse",
+    filterOpen: "Otkrytye",
+    filterDone: "Gotovye",
+    viewTodayTitle: "Karta prioritetov na segodnya",
+    listTodayTitle: "Chto vazhno seichas",
+    viewMoneyTitle: "Kontrol deneg",
+    listMoneyTitle: "Rashody, scheta i riski",
+    viewDocsTitle: "Radar dokumentov",
+    listDocsTitle: "Bumagi i dedlainy",
+    viewHealthTitle: "Liniya zdorovya",
+    listHealthTitle: "Vizity i rutina",
+    personalNamed: "{name}, den otsortirovan po vazhnosti.",
+    personalDefault: "Tvoi den otsortirovan po vazhnosti.",
+    nothingHere: "V etom razdele poka nichego net.",
+    dueLate: "prosrocheno na {days} dn.",
+    dueToday: "srok segodnya",
+    dueIn: "srok cherez {days} dn.",
+    highImpact: "vysokoe vliyanie",
+    mediumImpact: "srednee vliyanie",
+    lowImpact: "nizkoe vliyanie",
+    clearDay: "Den svoboden",
+    noOpenPriorities: "Otkrytyh prioritetov net. Mozhno minutku vydohnut.",
+    handleUrgent: "Snachala zakroi {count} srochnyi prioritet",
+    handleUrgentMany: "Snachala zakroi {count} srochnyh prioriteta",
+    startWithCategory: "Nachni s {category}, potom zakroi legkie pobedy",
+    lowerPriorityWait: " {count} delo nizhe po prioritetu mozhet podozhdat.",
+    lowerPriorityWaitMany: " {count} del nizhe po prioritetu mogut podozhdat.",
+    score: "Ball",
+    reasonLate: "prosrocheno na {days} dn.",
+    reasonToday: "srok segodnya",
+    reasonSoon: "srok cherez {days} dn.",
+    reasonMoney: "deneznyi risk",
+    reasonDocs: "srok dokumenta",
+    reasonHealth: "zaschita zdorovya",
+    reasonHigh: "vysokoe vliyanie",
+    reasonClean: "derzhit nedelyu v poryadke",
+    saved: "Sohraneno",
+    exported: "Eksportirovano",
+    imported: "Importirovano",
+    invalidFile: "Nevernyi fail",
+    radarAct: "Snachala krasnye zony",
+    radarWatch: "Ne dai etomu stat srochnym",
+    radarCalm: "Silnyh tochek davleniya net",
+    levelHigh: "Vysokii risk",
+    levelWatch: "Nablyudat",
+    levelStable: "Stabilno",
+    riskOverdue: "Prosrochki",
+    riskOverdueCopy: "{count} delo uzhe prosrocheno.",
+    riskOverdueCopyMany: "{count} del uzhe prosrocheno.",
+    riskOverdueEmpty: "Propuschennyh srokov seichas net.",
+    riskMoney: "Dengi",
+    riskMoneyCopy: "{amount} primernyi risk po schetam i finansovym delam.",
+    riskMoneyEmpty: "Otkrytyh denezhnyh del net.",
+    riskDocs: "Dokumenty",
+    riskDocsCopy: "{count} delo po dokumentam trebuet vnimaniya na etoi nedele.",
+    riskDocsCopyMany: "{count} del po dokumentam trebuyut vnimaniya na etoi nedele.",
+    riskDocsEmpty: "Otkrytyh srokov po dokumentam net.",
+    riskHealth: "Zdorovie",
+    riskHealthCopy: "{count} zadacha po zdorovyu zhdet.",
+    riskHealthCopyMany: "{count} zadach po zdorovyu zhdut.",
+    riskHealthEmpty: "Otkrytyh del po zdorovyu net.",
+    notifyOn: "Vkl",
+    notifyOff: "Vykl",
+    notifyBlocked: "Blok",
+    notifyUnsupported: "Net podderzhki",
+    notifyEnabled: "Uvedomleniya vkl",
+    notifyEnable: "Vklyuchit",
+    notifyFocus: "{count} napominanie blizko",
+    notifyFocusMany: "{count} napominanii blizko",
+    notifyFocusEmpty: "Blizkih napominanii net",
+    notifyEmpty: "Seichas napominanie ne nuzhno.",
+    alertTitle: "LifePilot uvedomleniya vklyucheny",
+    alertBody: "Budu napominat o srochnyh delah, poka prilozhenie otkryto.",
+    testTitle: "LifePilot test",
+    testBody: "Uvedomleniya rabotayut v etom brauzere.",
+    settingsFocus: "Lichnye nastroiki i backup"
+  }
 };
 
 const tagColors = {
@@ -76,6 +469,49 @@ const tagColors = {
   health: "#c53030",
   work: "#b7791f"
 };
+
+function t(key, vars = {}) {
+  const table = translations[state.settings.language] || translations.en;
+  const template = table[key] || translations.en[key] || key;
+  return Object.entries(vars).reduce((text, [name, value]) => {
+    return text.replaceAll(`{${name}}`, String(value));
+  }, template);
+}
+
+function pluralKey(count, oneKey, manyKey) {
+  return count === 1 ? oneKey : manyKey;
+}
+
+function applyLanguage() {
+  document.documentElement.lang = state.settings.language === "ru" ? "ru-Latn" : state.settings.language;
+  document.querySelectorAll("[data-i18n]").forEach(node => {
+    node.textContent = t(node.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(node => {
+    node.title = t(node.dataset.i18nTitle);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(node => {
+    node.placeholder = t(node.dataset.i18nPlaceholder);
+  });
+}
+
+function categoryLabel(category) {
+  return t({
+    admin: "catAdmin",
+    money: "catMoney",
+    docs: "catDocs",
+    health: "catHealth",
+    work: "catWork"
+  }[category] || "catAdmin");
+}
+
+function impactLabel(impact) {
+  return Number(impact) === 3 ? t("impactHigh") : Number(impact) === 2 ? t("impactMedium") : t("impactLow");
+}
+
+function impactReason(impact) {
+  return Number(impact) === 3 ? t("highImpact") : Number(impact) === 2 ? t("mediumImpact") : t("lowImpact");
+}
 
 function loadItems() {
   try {
@@ -101,7 +537,7 @@ function saveItems() {
 }
 
 function loadSettings() {
-  const defaults = { name: "", language: "en", currency: "USD" };
+  const defaults = { name: "", language: "lt", currency: "EUR" };
   try {
     const saved = JSON.parse(localStorage.getItem(settingsKey));
     return { ...defaults, ...(saved && typeof saved === "object" ? saved : {}) };
@@ -154,22 +590,22 @@ function categoryBoost(category) {
 
 function explain(item) {
   const days = daysUntil(item.date);
-  const when = days < 0 ? `${Math.abs(days)} days late` : days === 0 ? "due today" : `due in ${days} days`;
-  const impact = Number(item.impact) === 3 ? "high impact" : Number(item.impact) === 2 ? "medium impact" : "low impact";
+  const when = days < 0 ? t("dueLate", { days: Math.abs(days) }) : days === 0 ? t("dueToday") : t("dueIn", { days });
+  const impact = impactReason(item.impact);
   return `${when} / ${impact}`;
 }
 
 function planReason(item) {
   const days = daysUntil(item.date);
   const reasons = [];
-  if (days < 0) reasons.push(`${Math.abs(days)} days late`);
-  if (days === 0) reasons.push("due today");
-  if (days > 0 && days <= 2) reasons.push(`due in ${days} days`);
-  if (item.category === "money") reasons.push("money risk");
-  if (item.category === "docs") reasons.push("document deadline");
-  if (item.category === "health") reasons.push("health protection");
-  if (Number(item.impact) === 3) reasons.push("high impact");
-  if (!reasons.length) reasons.push("keeps the week clean");
+  if (days < 0) reasons.push(t("reasonLate", { days: Math.abs(days) }));
+  if (days === 0) reasons.push(t("reasonToday"));
+  if (days > 0 && days <= 2) reasons.push(t("reasonSoon", { days }));
+  if (item.category === "money") reasons.push(t("reasonMoney"));
+  if (item.category === "docs") reasons.push(t("reasonDocs"));
+  if (item.category === "health") reasons.push(t("reasonHealth"));
+  if (Number(item.impact) === 3) reasons.push(t("reasonHigh"));
+  if (!reasons.length) reasons.push(t("reasonClean"));
   return reasons.slice(0, 3).join(", ");
 }
 
@@ -209,30 +645,32 @@ function appendVoiceText(text) {
 function setVoiceStatus(text, listening = false) {
   els.voiceStatus.textContent = text;
   els.voice.classList.toggle("listening", listening);
-  els.voice.textContent = listening ? "Listening" : "Voice";
+  els.voice.textContent = listening ? t("listening") : t("voice");
   isListening = listening;
 }
 
 function voiceLocale() {
-  return state.settings.language === "ru" ? "ru-RU" : "en-US";
+  if (state.settings.language === "ru") return "ru-RU";
+  if (state.settings.language === "lt") return "lt-LT";
+  return "en-US";
 }
 
 function startVoiceInput() {
   if (isListening) {
     if (recognition) recognition.stop();
-    setVoiceStatus("Voice input stopped.");
+    setVoiceStatus(t("voiceStopped"));
     return;
   }
 
   if (window.LifePilotVoice && typeof window.LifePilotVoice.start === "function") {
-    setVoiceStatus("Listening on Android...", true);
+    setVoiceStatus(t("voiceAndroid"), true);
     window.LifePilotVoice.start(voiceLocale());
     return;
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    setVoiceStatus("Voice input is not supported on this device.", false);
+    setVoiceStatus(t("voiceUnsupported"), false);
     return;
   }
 
@@ -240,24 +678,24 @@ function startVoiceInput() {
   recognition.lang = voiceLocale();
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
-  recognition.onstart = () => setVoiceStatus("Listening...", true);
-  recognition.onerror = () => setVoiceStatus("Voice input failed or permission was denied.");
-  recognition.onend = () => setVoiceStatus("Voice input ready.");
+  recognition.onstart = () => setVoiceStatus(`${t("listening")}...`, true);
+  recognition.onerror = () => setVoiceStatus(t("voiceFailed"));
+  recognition.onend = () => setVoiceStatus(t("voiceReady"));
   recognition.onresult = event => {
     const text = event.results?.[0]?.[0]?.transcript || "";
     appendVoiceText(text);
-    setVoiceStatus("Voice note added.");
+    setVoiceStatus(t("voiceNoteAdded"));
   };
   recognition.start();
 }
 
 window.receiveVoiceInput = text => {
   appendVoiceText(text);
-  setVoiceStatus("Voice note added.");
+  setVoiceStatus(t("voiceNoteAdded"));
 };
 
 window.receiveVoiceStatus = text => {
-  setVoiceStatus(text || "Voice input ready.");
+  setVoiceStatus(text || t("voiceReady"));
 };
 
 function acceptParsedItems() {
@@ -298,8 +736,9 @@ function cleanTitle(text) {
   return text
     .replace(/\b(today|tomorrow|tonight|this week|next week|in \d+ days?|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/gi, "")
     .replace(/\b(segodnya|zavtra|zavtro|poslezavtra|na etoi nedele|na sleduyushei nedele|cherez \d+ dnya?|cherez \d+ dnei|ponedelnik|vtornik|sreda|sredu|chetverg|pyatnica|pyatnicu|subbota|voskresene)\b/gi, "")
+    .replace(/\b(siandien|rytoj|poryt|sia savaite|kita savaite|po \d+ dienu?|pirmadienis|pirmadieni|antradienis|antradieni|treciadienis|treciadieni|ketvirtadienis|ketvirtadieni|penktadienis|penktadieni|sestadienis|sestadieni|sekmadienis|sekmadieni)\b/gi, "")
     .replace(/\b(сегодня|завтра|послезавтра|на этой неделе|на следующей неделе|через \d+ дня?|через \d+ дней|понедельник|понедельникe|вторник|среда|среду|четверг|пятница|пятницу|суббота|воскресенье)\b/gi, "")
-    .replace(/\b(v|vo|na|do|k|ko|by|on|in)\b/gi, "")
+    .replace(/\b(v|vo|na|do|k|ko|by|on|in|i|iki|pas)\b/gi, "")
     .replace(/\b(в|во|на|до|к|ко)\b/gi, "")
     .replace(/\b\d{1,2}[./-]\d{1,2}([./-]\d{2,4})?\b/g, "")
     .replace(/\s+/g, " ")
@@ -315,14 +754,26 @@ function detectCategory(text) {
     ["health", ["doctor", "dentist", "clinic", "medicine", "workout", "sleep", "pozvoni vrachu", "vrach", "stomatolog", "klinika", "lekarstvo", "zdorov", "son", "analiz", "apteka", "врач", "врачу", "доктор", "стоматолог", "клиника", "лекарство", "здоров", "сон", "анализ", "аптека"]],
     ["work", ["client", "meeting", "email", "invoice", "project", "call", "rabota", "klient", "vstrecha", "pismo", "proekt", "zvonok", "созвон", "работа", "клиент", "встреча", "письмо", "проект", "звонок", "почта"]]
   ];
-  const match = tests.find(([, words]) => words.some(word => value.includes(word)));
+  const lithuanianTests = [
+    ["money", ["apmoketi", "moketi", "saskaita", "nuoma", "bankas", "atlyginimas", "prenumerata", "skola", "bauda"]],
+    ["docs", ["pasas", "viza", "draudimas", "mokestis", "sutartis", "dokumentas", "pazyma", "pratesti"]],
+    ["health", ["gydytojas", "gydytoja", "odontologas", "klinika", "vaistai", "sveikata", "miegas", "vaistine", "uzsirasyti"]],
+    ["work", ["darbas", "klientas", "susitikimas", "laiskas", "projektas", "skambutis", "paskambinti"]]
+  ];
+  const allTests = tests.map(([category, words]) => {
+    const extra = lithuanianTests.find(([ltCategory]) => ltCategory === category)?.[1] || [];
+    return [category, words.concat(extra)];
+  });
+  const match = allTests.find(([, words]) => words.some(word => value.includes(word)));
   return match ? match[0] : "admin";
 }
 
 function detectImpact(text) {
   const value = text.toLowerCase();
+  if (/\b(skubu|veluoja|skola|bauda|problema)\b/.test(value)) return 3;
   if (/\b(urgent|asap|late|overdue|srochno|gorit|dolg|shtraf|problem|срочно|горит|долг|штраф|проблема|просрочено)\b/.test(value)) return 3;
   if (detectCategory(text) === "money" || detectCategory(text) === "docs") return 3;
+  if (/\b(uzsirasyti|paskambinti|issiusti|padaryti|pratesti)\b/.test(value)) return 2;
   if (/\b(book|call|send|renew|pozvonit|pozvoni|otpravit|sdelat|zapisat|записать|позвонить|позвони|отправить|сделать|продлить)\b/.test(value)) return 2;
   return 1;
 }
@@ -334,6 +785,13 @@ function detectDate(text) {
     const year = numeric[3] ? normalizeYear(numeric[3]) : new Date().getFullYear();
     return toIsoDate(year, Number(numeric[2]), Number(numeric[1]));
   }
+  const lithuanianDays = value.match(/\bpo\s+(\d+)\s+(?:diena|dienas|dienu)\b/);
+  if (lithuanianDays) return offsetDate(Number(lithuanianDays[1]));
+  if (/\b(siandien)\b/.test(value)) return todayIso();
+  if (/\b(rytoj)\b/.test(value)) return offsetDate(1);
+  if (/\b(poryt)\b/.test(value)) return offsetDate(2);
+  if (/\b(sia savaite)\b/.test(value)) return offsetDate(5);
+  if (/\b(kita savaite)\b/.test(value)) return offsetDate(9);
   const relativeDays = value.match(/\b(?:in|cherez|через)\s+(\d+)\s+(?:day|days|den|dnya|dnei|день|дня|дней)\b/);
   if (relativeDays) return offsetDate(Number(relativeDays[1]));
   if (/\b(today|tonight|segodnya|сегодня)\b/.test(value)) return todayIso();
@@ -359,6 +817,18 @@ function toIsoDate(year, month, day) {
 }
 
 function findWeekday(value) {
+  const lithuanianDays = [
+    ["sekmadienis", "sekmadieni"],
+    ["pirmadienis", "pirmadieni"],
+    ["antradienis", "antradieni"],
+    ["treciadienis", "treciadieni"],
+    ["ketvirtadienis", "ketvirtadieni"],
+    ["penktadienis", "penktadieni"],
+    ["sestadienis", "sestadieni"]
+  ];
+  const lithuanianIndex = lithuanianDays.findIndex(names => names.some(name => value.includes(name)));
+  if (lithuanianIndex >= 0) return lithuanianIndex;
+
   const days = [
     ["sunday", "voskresene", "воскресенье"],
     ["monday", "ponedelnik", "понедельник"],
@@ -409,12 +879,14 @@ function visibleItems() {
 }
 
 function render() {
+  applyLanguage();
+  if (!isListening) els.voice.textContent = t("voice");
   const labels = viewLabels[state.view];
-  els.viewTitle.textContent = labels[0];
-  els.listTitle.textContent = labels[1];
+  els.viewTitle.textContent = t(labels[0]);
+  els.listTitle.textContent = t(labels[1]);
   els.personalLine.textContent = state.settings.name
-    ? `${state.settings.name}, your day is sorted by what matters.`
-    : "Your day, sorted by what matters.";
+    ? t("personalNamed", { name: state.settings.name })
+    : t("personalDefault");
 
   document.querySelectorAll(".nav-button").forEach(button => {
     button.classList.toggle("active", button.dataset.view === state.view);
@@ -427,6 +899,7 @@ function render() {
   renderRiskRadar();
   renderNotifications();
   renderSettings();
+  renderCapturePreview();
   renderList();
 }
 
@@ -456,9 +929,9 @@ function renderCounts() {
 function formatMoney(amount) {
   const symbols = {
     USD: "$",
-    EUR: "€",
-    RUB: "₽",
-    GBP: "£"
+    EUR: "\u20ac",
+    RUB: "\u20bd",
+    GBP: "\u00a3"
   };
   return `${symbols[state.settings.currency] || "$"}${amount}`;
 }
@@ -469,7 +942,7 @@ function renderList() {
   if (!items.length) {
     const empty = document.createElement("div");
     empty.className = "empty";
-    empty.textContent = "Nothing in this view yet.";
+    empty.textContent = t("nothingHere");
     els.itemList.append(empty);
     return;
   }
@@ -480,7 +953,7 @@ function renderList() {
     node.classList.toggle("done", item.done);
     node.querySelector("h4").textContent = item.title;
     node.querySelector("p").textContent = explain(item);
-    node.querySelector(".tag").textContent = item.category;
+    node.querySelector(".tag").textContent = categoryLabel(item.category);
     node.querySelector(".tag").style.background = tagColors[item.category] || tagColors.admin;
     node.querySelector(".score").textContent = score;
     node.querySelector(".score").classList.toggle("hot", score >= 78);
@@ -499,10 +972,10 @@ function renderCapturePreview() {
 
   parsedDraft.forEach(item => {
     const node = els.previewTemplate.content.firstElementChild.cloneNode(true);
-    node.querySelector(".preview-tag").textContent = item.category;
+    node.querySelector(".preview-tag").textContent = categoryLabel(item.category);
     node.querySelector(".preview-tag").style.background = tagColors[item.category] || tagColors.admin;
     node.querySelector("strong").textContent = item.title;
-    node.querySelector("small").textContent = `${item.date} / ${Number(item.impact) === 3 ? "high" : Number(item.impact) === 2 ? "medium" : "low"}`;
+    node.querySelector("small").textContent = `${item.date} / ${impactLabel(item.impact)}`;
     els.capturePreview.append(node);
   });
 }
@@ -511,10 +984,10 @@ function renderDailyPlan(plan, openCount) {
   els.planList.innerHTML = "";
 
   if (!plan.length) {
-    els.planFocus.textContent = "Clear day";
+    els.planFocus.textContent = t("clearDay");
     const empty = document.createElement("p");
     empty.className = "plan-empty";
-    empty.textContent = "No open priorities. You can breathe for a minute.";
+    empty.textContent = t("noOpenPriorities");
     els.planList.append(empty);
     return;
   }
@@ -522,15 +995,16 @@ function renderDailyPlan(plan, openCount) {
   const hotCount = plan.filter(item => priorityScore(item) >= 78).length;
   const firstCategory = plan[0].category;
   els.planFocus.textContent = hotCount
-    ? `Handle ${hotCount} urgent priority${hotCount === 1 ? "" : "ies"} first`
-    : `Start with ${firstCategory}, then clear the easy wins`;
+    ? t(pluralKey(hotCount, "handleUrgent", "handleUrgentMany"), { count: hotCount })
+    : t("startWithCategory", { category: categoryLabel(firstCategory).toLowerCase() });
 
   plan.forEach((item, index) => {
     const node = els.planTemplate.content.firstElementChild.cloneNode(true);
-    const remaining = openCount > plan.length && index === plan.length - 1 ? ` ${openCount - plan.length} lower priority item${openCount - plan.length === 1 ? "" : "s"} can wait.` : "";
+    const waiting = openCount - plan.length;
+    const remaining = waiting > 0 && index === plan.length - 1 ? t(pluralKey(waiting, "lowerPriorityWait", "lowerPriorityWaitMany"), { count: waiting }) : "";
     node.querySelector(".step-number").textContent = index + 1;
     node.querySelector("strong").textContent = item.title;
-    node.querySelector("p").textContent = `${planReason(item)}. Score ${priorityScore(item)}.${remaining}`;
+    node.querySelector("p").textContent = `${planReason(item)}. ${t("score")} ${priorityScore(item)}.${remaining}`;
     els.planList.append(node);
   });
 }
@@ -545,43 +1019,48 @@ function buildRisks() {
   return [
     {
       key: "today",
-      title: "Overdue",
+      title: t("riskOverdue"),
       count: overdue.length,
       view: "today",
-      copy: overdue.length ? `${overdue.length} item${overdue.length === 1 ? "" : "s"} already past due.` : "No missed deadlines right now.",
+      copy: overdue.length ? t(pluralKey(overdue.length, "riskOverdueCopy", "riskOverdueCopyMany"), { count: overdue.length }) : t("riskOverdueEmpty"),
       severity: overdue.length ? "hot" : "calm"
     },
     {
       key: "money",
-      title: "Money",
+      title: t("riskMoney"),
       count: money.length,
       view: "money",
-      copy: money.length ? `${formatMoney(money.length * 120)} estimated exposure from bills and finance tasks.` : "No money tasks open.",
+      copy: money.length ? t("riskMoneyCopy", { amount: formatMoney(money.length * 120) }) : t("riskMoneyEmpty"),
       severity: money.some(item => priorityScore(item) >= 78) ? "hot" : money.length ? "warn" : "calm"
     },
     {
       key: "docs",
-      title: "Documents",
+      title: t("riskDocs"),
       count: docs.length,
       view: "docs",
-      copy: docs.length ? `${docs.filter(item => daysUntil(item.date) <= 7).length} document task${docs.length === 1 ? "" : "s"} need attention this week.` : "No document deadlines open.",
+      copy: docs.length ? t(pluralKey(docs.length, "riskDocsCopy", "riskDocsCopyMany"), { count: docs.filter(item => daysUntil(item.date) <= 7).length }) : t("riskDocsEmpty"),
       severity: docs.some(item => daysUntil(item.date) <= 2) ? "hot" : docs.length ? "warn" : "calm"
     },
     {
       key: "health",
-      title: "Health",
+      title: t("riskHealth"),
       count: health.length,
       view: "health",
-      copy: health.length ? `${health.length} health routine or appointment task${health.length === 1 ? "" : "s"} waiting.` : "No health tasks open.",
+      copy: health.length ? t(pluralKey(health.length, "riskHealthCopy", "riskHealthCopyMany"), { count: health.length }) : t("riskHealthEmpty"),
       severity: health.some(item => priorityScore(item) >= 78) ? "hot" : health.length ? "warn" : "calm"
     }
   ];
 }
 
 function renderSettings() {
+  if (!translations[state.settings.language]) state.settings.language = "lt";
   els.profileName.value = state.settings.name;
   els.language.value = state.settings.language;
   els.currency.value = state.settings.currency;
+  els.settingsFocus.textContent = t("settingsFocus");
+  if (!els.settingsStatus.classList.contains("warn") && !els.settingsStatus.classList.contains("error")) {
+    els.settingsStatus.textContent = t("saved");
+  }
 }
 
 function setSettingsStatus(text, mode = "saved") {
@@ -590,7 +1069,7 @@ function setSettingsStatus(text, mode = "saved") {
   els.settingsStatus.classList.toggle("error", mode === "error");
   clearTimeout(setSettingsStatus.timer);
   setSettingsStatus.timer = setTimeout(() => {
-    els.settingsStatus.textContent = "Saved";
+    els.settingsStatus.textContent = t("saved");
     els.settingsStatus.classList.remove("warn", "error");
   }, 2200);
 }
@@ -598,7 +1077,7 @@ function setSettingsStatus(text, mode = "saved") {
 function updateSetting(key, value) {
   state.settings = { ...state.settings, [key]: value };
   saveSettings();
-  setSettingsStatus("Saved");
+  setSettingsStatus(t("saved"));
   render();
 }
 
@@ -619,7 +1098,7 @@ function exportBackup() {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  setSettingsStatus("Exported");
+  setSettingsStatus(t("exported"));
 }
 
 function importBackupFile(file) {
@@ -636,11 +1115,11 @@ function importBackupFile(file) {
       saveItems();
       saveSettings();
       els.importFile.value = "";
-      setSettingsStatus("Imported");
+      setSettingsStatus(t("imported"));
       render();
     } catch {
       els.importFile.value = "";
-      setSettingsStatus("Invalid file", "error");
+      setSettingsStatus(t("invalidFile"), "error");
     }
   });
   reader.readAsText(file);
@@ -664,8 +1143,8 @@ function renderRiskRadar() {
   const hot = risks.filter(risk => risk.severity === "hot").length;
   const warn = risks.filter(risk => risk.severity === "warn").length;
 
-  els.radarFocus.textContent = hot ? "Act on red zones first" : warn ? "Keep these from becoming urgent" : "No major pressure points";
-  els.radarLevel.textContent = hot ? "High risk" : warn ? "Watch" : "Stable";
+  els.radarFocus.textContent = hot ? t("radarAct") : warn ? t("radarWatch") : t("radarCalm");
+  els.radarLevel.textContent = hot ? t("levelHigh") : warn ? t("levelWatch") : t("levelStable");
   els.radarLevel.classList.toggle("danger", hot > 0);
   els.radarLevel.classList.toggle("warning", hot === 0 && warn > 0);
 
@@ -705,17 +1184,17 @@ function renderNotifications() {
 
   els.notifyStatus.classList.toggle("on", permission === "granted");
   els.notifyStatus.classList.toggle("blocked", permission === "denied" || permission === "unsupported");
-  els.notifyStatus.textContent = permission === "granted" ? "On" : permission === "denied" ? "Blocked" : permission === "unsupported" ? "Unsupported" : "Off";
-  els.notify.textContent = permission === "granted" ? "Alerts enabled" : "Enable alerts";
+  els.notifyStatus.textContent = permission === "granted" ? t("notifyOn") : permission === "denied" ? t("notifyBlocked") : permission === "unsupported" ? t("notifyUnsupported") : t("notifyOff");
+  els.notify.textContent = permission === "granted" ? t("notifyEnabled") : t("notifyEnable");
   els.notify.disabled = permission === "granted" || permission === "unsupported";
   els.testNotify.disabled = permission !== "granted";
-  els.notifyFocus.textContent = reminders.length ? `${reminders.length} reminder${reminders.length === 1 ? "" : "s"} in range` : "No reminders due soon";
+  els.notifyFocus.textContent = reminders.length ? t(pluralKey(reminders.length, "notifyFocus", "notifyFocusMany"), { count: reminders.length }) : t("notifyFocusEmpty");
 
   els.notifyList.innerHTML = "";
   if (!reminders.length) {
     const empty = document.createElement("p");
     empty.className = "plan-empty";
-    empty.textContent = "Nothing needs a reminder right now.";
+    empty.textContent = t("notifyEmpty");
     els.notifyList.append(empty);
     return;
   }
@@ -742,7 +1221,7 @@ async function enableNotifications() {
   }
   renderNotifications();
   if (Notification.permission === "granted") {
-    sendNotification("LifePilot alerts enabled", "I will remind you about urgent tasks while this app is open.");
+    sendNotification(t("alertTitle"), t("alertBody"));
   }
 }
 
@@ -841,7 +1320,7 @@ els.seed.addEventListener("click", seedItems);
 els.plan.addEventListener("click", buildDailyPlan);
 els.notify.addEventListener("click", enableNotifications);
 els.install.addEventListener("click", installApp);
-els.testNotify.addEventListener("click", () => sendNotification("LifePilot test", "Notifications are working in this browser."));
+els.testNotify.addEventListener("click", () => sendNotification(t("testTitle"), t("testBody")));
 els.profileName.addEventListener("input", () => updateSetting("name", els.profileName.value.trim()));
 els.language.addEventListener("change", () => updateSetting("language", els.language.value));
 els.currency.addEventListener("change", () => updateSetting("currency", els.currency.value));
